@@ -1,7 +1,7 @@
 import logging
 logging.basicConfig(level=logging.ERROR)
+import re
 
-print("Libraries imported.")
 import sys
 import io
 
@@ -33,16 +33,17 @@ def evaluate_code(code: str) -> dict:
         }
 
 def guardrail_check(code: str) -> bool:
-    """Checks if the code contains any disallowed keywords."""
+    """Checks if the code contains any disallowed keywords (as whole words)."""
     disallowed_keywords = [
         # "import",
         "exec", "eval", "os", "sys", "open"
     ]
-    return not any(keyword in code for keyword in disallowed_keywords)
+    pattern = r'\b(' + '|'.join(re.escape(kw) for kw in disallowed_keywords) + r')\b'
+    return not re.search(pattern, code)
+
 
 
 def coder(code: str) -> str:
-    print(code)
     """Processes the code, checks for guardrails, and evaluates it."""
     if not guardrail_check(code):
         return "Code contains disallowed libraries."
